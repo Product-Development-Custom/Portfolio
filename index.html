@@ -110,6 +110,13 @@
       color: #ffffff;
     }
 
+    html,
+    body {
+      width: 100%;
+      max-width: 100%;
+      overflow-x: hidden;
+    }
+
     body {
       background-color: var(--bg-deep);
       background-image:
@@ -120,7 +127,6 @@
       background-size: 100% 100%, 100% 100%, 48px 48px, 48px 48px;
       background-position: 0 0, 0 0, -1px -1px, -1px -1px;
       min-height: 100vh;
-      overflow-x: hidden;
       position: relative;
     }
 
@@ -618,10 +624,25 @@
       height: 100%;
       display: block;
       cursor: grab;
+      touch-action: none;
     }
 
     #three-canvas:active {
       cursor: grabbing;
+    }
+
+    .mobile-text {
+      display: none;
+    }
+
+    @media (max-width: 640px) {
+      .desktop-text {
+        display: none !important;
+      }
+
+      .mobile-text {
+        display: inline !important;
+      }
     }
 
     /* 3D Viewport Controls HUD Overlay */
@@ -2392,14 +2413,15 @@
     .terminal-lightbox {
       position: fixed;
       inset: 0;
-      background: rgba(3, 5, 10, 0.94);
-      backdrop-filter: blur(16px);
+      background: rgba(3, 5, 10, 0.98);
+      backdrop-filter: blur(20px);
       z-index: 3000;
       display: none;
       flex-direction: column;
-      padding: 20px;
+      padding: 10px 16px;
       opacity: 0;
       transition: opacity 0.25s ease;
+      touch-action: pan-x pan-y pinch-zoom;
     }
 
     .terminal-lightbox.open {
@@ -2411,45 +2433,72 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 10px 16px;
-      background: rgba(12, 17, 28, 0.8);
+      padding: 8px 14px;
+      background: rgba(12, 17, 28, 0.92);
       border: 1px solid rgba(255, 255, 255, 0.08);
       border-radius: var(--radius-sm);
-      margin-bottom: 14px;
+      margin-bottom: 8px;
+      gap: 10px;
+      flex-shrink: 0;
     }
 
     .lightbox-title-box {
       display: flex;
       align-items: center;
-      gap: 12px;
+      gap: 8px;
+      min-width: 0;
+      flex: 1;
     }
 
     .lightbox-title {
       font-family: var(--font-display);
-      font-size: 1.05rem;
+      font-size: 0.95rem;
       color: #ffffff;
       font-weight: 700;
-    }
-
-    .lightbox-counter {
-      font-family: var(--font-mono);
-      font-size: 0.76rem;
-      color: var(--cyan-neon);
-      background: rgba(0, 240, 255, 0.08);
-      border: 1px solid rgba(0, 240, 255, 0.25);
-      padding: 3px 10px;
-      border-radius: 50px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
     .lightbox-actions {
       display: flex;
       align-items: center;
-      gap: 12px;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+
+    .lightbox-action-tool {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      padding: 5px 10px;
+      color: #9cb0d1;
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      cursor: pointer;
+      transition: var(--transition-fast);
+      user-select: none;
+    }
+
+    .lightbox-action-tool:hover {
+      background: rgba(0, 240, 255, 0.12);
+      border-color: var(--cyan-neon);
+      color: var(--cyan-neon);
+    }
+
+    .lightbox-action-tool.active {
+      background: var(--cyan-neon);
+      color: #05070c;
+      border-color: var(--cyan-neon);
+      box-shadow: 0 0 12px rgba(0, 240, 255, 0.4);
     }
 
     .lightbox-close-btn {
-      width: 36px;
-      height: 36px;
+      width: 34px;
+      height: 34px;
       border-radius: 50%;
       background: rgba(255, 255, 255, 0.06);
       border: 1px solid var(--border-subtle);
@@ -2458,8 +2507,9 @@
       align-items: center;
       justify-content: center;
       cursor: pointer;
-      font-size: 1.1rem;
+      font-size: 1.05rem;
       transition: var(--transition-fast);
+      flex-shrink: 0;
     }
 
     .lightbox-close-btn:hover {
@@ -2474,23 +2524,102 @@
       justify-content: center;
       position: relative;
       min-height: 0;
+      overflow: hidden;
+      cursor: zoom-in;
+    }
+
+    .lightbox-img-wrapper {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      height: 100%;
+      transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      transform-origin: center center;
     }
 
     .lightbox-img {
-      max-width: 95%;
-      max-height: 78vh;
+      width: auto;
+      height: auto;
+      max-width: 98%;
+      max-height: calc(100vh - 110px);
       object-fit: contain;
-      border-radius: 8px;
-      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8), 0 0 30px rgba(0, 240, 255, 0.15);
-      border: 1px solid rgba(0, 240, 255, 0.25);
+      border-radius: 6px;
+      box-shadow: 0 15px 45px rgba(0, 0, 0, 0.85);
+      user-select: none;
+      -webkit-user-drag: none;
+      transition: transform 0.25s ease;
+    }
+
+    /* Zoomed State */
+    .lightbox-content-stage.zoomed {
+      cursor: grab;
+      overflow: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .lightbox-content-stage.zoomed:active {
+      cursor: grabbing;
+    }
+
+    .lightbox-content-stage.zoomed .lightbox-img-wrapper {
+      width: auto;
+      height: auto;
+      min-width: 100%;
+      min-height: 100%;
+      margin: auto;
+    }
+
+    .lightbox-content-stage.zoomed .lightbox-img {
+      max-width: none;
+      max-height: none;
+      width: 185%;
+      cursor: grab;
+    }
+
+    /* Rotated State for Mobile Landscape Inspection */
+    .lightbox-content-stage.rotated .lightbox-img-wrapper {
+      transform: rotate(90deg) scale(1.4);
+    }
+
+    .lightbox-reset-pill {
+      position: absolute;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(12, 17, 28, 0.92);
+      border: 1px solid var(--cyan-neon);
+      border-radius: var(--radius-full);
+      padding: 6px 16px;
+      font-family: var(--font-mono);
+      font-size: 0.74rem;
+      color: var(--cyan-neon);
+      cursor: pointer;
+      box-shadow: 0 4px 20px rgba(0, 240, 255, 0.3);
+      display: none;
+      z-index: 20;
+      backdrop-filter: blur(8px);
+      user-select: none;
+    }
+
+    .lightbox-reset-pill:hover {
+      background: var(--cyan-neon);
+      color: #05070c;
+    }
+
+    .lightbox-content-stage.zoomed .lightbox-reset-pill,
+    .lightbox-content-stage.rotated .lightbox-reset-pill {
+      display: flex;
+      align-items: center;
+      gap: 6px;
     }
 
     .lightbox-nav-btn {
       position: absolute;
       top: 50%;
       transform: translateY(-50%);
-      width: 50px;
-      height: 50px;
+      width: 44px;
+      height: 44px;
       border-radius: 50%;
       background: rgba(12, 17, 28, 0.85);
       border: 1px solid rgba(0, 240, 255, 0.35);
@@ -2501,6 +2630,7 @@
       cursor: pointer;
       transition: var(--transition-fast);
       z-index: 10;
+      backdrop-filter: blur(8px);
     }
 
     .lightbox-nav-btn:hover {
@@ -2510,19 +2640,94 @@
     }
 
     .lightbox-nav-btn.prev {
-      left: 20px;
+      left: 12px;
     }
 
     .lightbox-nav-btn.next {
-      right: 20px;
+      right: 12px;
     }
 
     .lightbox-caption-bar {
       text-align: center;
-      padding: 12px;
-      font-size: 0.88rem;
+      padding: 6px 12px;
+      font-size: 0.74rem;
       color: #9cb0d1;
       font-family: var(--font-mono);
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    @media (max-width: 640px) {
+      .terminal-lightbox {
+        padding: 6px 6px;
+      }
+
+      .lightbox-header {
+        padding: 5px 8px;
+        margin-bottom: 4px;
+        gap: 6px;
+      }
+
+      .lightbox-title {
+        font-size: 0.78rem;
+      }
+
+      .lightbox-tool-label {
+        display: none;
+      }
+
+      .lightbox-action-tool {
+        padding: 5px 6px;
+      }
+
+      .lightbox-content-stage.rotated .lightbox-img-wrapper {
+        transform: rotate(90deg) scale(1.6);
+      }
+
+      .lightbox-img {
+        width: 100%;
+        max-width: 100%;
+      }
+
+      .lightbox-content-stage.zoomed .lightbox-img {
+        width: 240%;
+        max-width: none;
+      }
+
+      .lightbox-content-stage.zoomed::-webkit-scrollbar {
+        height: 3px;
+      }
+
+      .lightbox-content-stage.zoomed::-webkit-scrollbar-thumb {
+        background: var(--cyan-neon);
+        border-radius: 3px;
+      }
+
+      .lightbox-nav-btn {
+        width: 32px;
+        height: 32px;
+      }
+
+      .lightbox-nav-btn svg {
+        width: 16px;
+        height: 16px;
+      }
+
+      .lightbox-nav-btn.prev {
+        left: 4px;
+      }
+
+      .lightbox-nav-btn.next {
+        right: 4px;
+      }
+
+      .lightbox-caption-bar {
+        font-size: 0.65rem;
+        padding: 4px 6px;
+      }
     }
 
     /* Upcoming Personal Project Card */
@@ -2960,7 +3165,7 @@
       }
 
       .hero-visualizer {
-        height: 420px;
+        height: 460px;
       }
 
       .twin-feature-grid {
@@ -2983,10 +3188,13 @@
         grid-template-columns: repeat(3, minmax(0, 1fr));
         gap: 18px;
       }
+
+      .personal-features-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
     }
 
     @media (max-width: 820px) {
-
       .edu-grid {
         grid-template-columns: 1fr;
       }
@@ -3017,13 +3225,322 @@
       }
     }
 
+    /* Tablet & Large Mobile Screen Breakpoint for Project Console */
+    @media (max-width: 768px) {
+      .personal-project-showcase {
+        padding: 0;
+      }
+
+      .personal-project-title {
+        font-size: clamp(1.35rem, 5vw, 1.65rem);
+        line-height: 1.3;
+      }
+
+      .personal-badge-row {
+        gap: 6px;
+        flex-wrap: wrap;
+      }
+
+      .personal-status-pill,
+      .personal-tech-badge {
+        font-size: 0.68rem;
+        padding: 3px 10px;
+      }
+
+      .personal-project-desc {
+        font-size: 0.86rem;
+        line-height: 1.55;
+      }
+
+      .personal-actions-row .btn-primary {
+        width: 100%;
+        justify-content: center;
+        text-align: center;
+      }
+
+      .personal-urls-container {
+        width: 100%;
+      }
+
+      .personal-url-tag {
+        width: 100%;
+        font-size: 0.78rem;
+        box-sizing: border-box;
+        justify-content: flex-start;
+      }
+
+      .personal-url-tag a {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      /* Terminal Console Topbar on Mobile */
+      .terminal-console-topbar {
+        padding: 8px 12px;
+        gap: 8px;
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .terminal-topbar-left {
+        width: 100%;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .terminal-console-title {
+        font-size: 0.7rem;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        flex: 1;
+      }
+
+      .terminal-topbar-right {
+        width: 100%;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .terminal-live-indicator {
+        font-size: 0.65rem;
+        padding: 2px 8px;
+      }
+
+      .terminal-zoom-trigger {
+        font-size: 0.68rem;
+        padding: 3px 8px;
+      }
+
+      /* Terminal Stage (Aspect-ratio fits 16:9 snugly without giant empty black bars) */
+      .terminal-screen-stage {
+        min-height: 200px;
+        max-height: 280px;
+        aspect-ratio: 16 / 10;
+        height: auto;
+        cursor: pointer;
+        touch-action: pan-y pinch-zoom;
+      }
+
+      .terminal-main-img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+      }
+
+      .terminal-arrow-btn {
+        width: 32px;
+        height: 32px;
+        background: rgba(8, 12, 22, 0.78);
+        border: 1px solid rgba(0, 240, 255, 0.35);
+      }
+
+      .terminal-arrow-btn svg {
+        width: 16px;
+        height: 16px;
+      }
+
+      .terminal-arrow-btn.prev {
+        left: 6px;
+      }
+
+      .terminal-arrow-btn.next {
+        right: 6px;
+      }
+
+      .terminal-zoom-hint {
+        top: 8px;
+        right: 8px;
+        font-size: 0.62rem;
+        padding: 3px 8px;
+        opacity: 0.88;
+      }
+
+      /* Terminal Meta Bar on Mobile */
+      .terminal-screen-meta {
+        padding: 12px 14px;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+      }
+
+      .terminal-meta-badge {
+        font-size: 0.62rem;
+        padding: 2px 6px;
+      }
+
+      .terminal-meta-title {
+        font-size: 0.95rem;
+        line-height: 1.35;
+      }
+
+      .terminal-meta-desc {
+        font-size: 0.78rem;
+        line-height: 1.45;
+        color: #9cb0d1;
+      }
+
+      .terminal-meta-tags {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+      }
+
+      .meta-tag {
+        font-size: 0.62rem;
+        padding: 2px 6px;
+      }
+
+      /* Thumbnail Quick-Selector Strip: Ultra-smooth horizontal carousel */
+      .terminal-thumbnails-strip {
+        display: flex;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        scroll-snap-type: x mandatory;
+        padding: 10px 12px;
+        gap: 8px;
+        scrollbar-width: none;
+      }
+
+      .terminal-thumbnails-strip::-webkit-scrollbar {
+        display: none;
+      }
+
+      .terminal-thumb-item {
+        flex: 0 0 108px;
+        scroll-snap-align: start;
+        padding: 4px;
+        border-radius: 6px;
+      }
+
+      .terminal-thumb-img {
+        aspect-ratio: 16 / 9;
+        border-radius: 4px;
+      }
+
+      .terminal-thumb-label {
+        font-size: 0.64rem;
+      }
+
+      /* System Capabilities Grid on Tablet/Mobile */
+      .personal-features-grid {
+        grid-template-columns: 1fr;
+        gap: 10px;
+        margin-top: 14px;
+      }
+
+      .personal-feature-item {
+        padding: 12px;
+        gap: 10px;
+      }
+
+      .feat-icon {
+        font-size: 1.2rem;
+      }
+
+      .personal-feature-item strong {
+        font-size: 0.85rem;
+      }
+
+      .personal-feature-item p {
+        font-size: 0.78rem;
+        line-height: 1.45;
+      }
+    }
+
+    /* Mobile Viewport for 3D Simulator & Common Layout */
+    @media (max-width: 640px) {
+      .hero-visualizer {
+        height: 420px;
+      }
+
+      .viewport-overlay {
+        top: 10px;
+        left: 10px;
+        right: 10px;
+        gap: 6px;
+      }
+
+      .viewport-tag {
+        padding: 4px 8px;
+        font-size: 0.68rem;
+        white-space: nowrap;
+        gap: 4px;
+      }
+
+      .viewport-tag svg {
+        width: 12px;
+        height: 12px;
+      }
+
+      .viewport-tools {
+        gap: 4px;
+      }
+
+      .viewport-btn {
+        padding: 5px 8px;
+        font-size: 0.68rem;
+        gap: 3px;
+      }
+
+      .viewport-bottom-hud {
+        bottom: 10px;
+        left: 10px;
+        right: 10px;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 8px;
+      }
+
+      .viewport-dro {
+        padding: 6px 12px;
+        width: 100%;
+        box-sizing: border-box;
+        backdrop-filter: blur(10px);
+      }
+
+      .dro-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .dro-badge {
+        font-size: 0.68rem;
+      }
+
+      .dro-stage {
+        font-size: 0.64rem;
+      }
+
+      .dro-coords {
+        font-size: 0.64rem;
+      }
+
+      .btn-sim-cut {
+        width: 100%;
+        justify-content: center;
+        padding: 10px 14px;
+        font-size: 0.78rem;
+        border-radius: var(--radius-sm);
+      }
+    }
+
     @media (max-width: 520px) {
       .metrics-grid {
         grid-template-columns: 1fr;
       }
 
       .hero-visualizer {
-        height: 340px;
+        height: 400px;
+      }
+
+      .viewport-tools .viewport-btn {
+        padding: 4px 6px;
+        font-size: 0.64rem;
       }
 
       .timeline-item {
@@ -3212,7 +3729,8 @@
                 <path d="m14.83 14.83 4.24 4.24"></path>
                 <path d="m9.17 14.83-4.24 4.24"></path>
               </svg>
-              <span>3D DIGITAL TWIN // LIVE CNC</span>
+              <span class="desktop-text">3D DIGITAL TWIN // LIVE CNC</span>
+              <span class="mobile-text">LIVE CNC</span>
             </div>
             <div class="viewport-tools">
               <button class="viewport-btn active" id="btnViewIso" onclick="setCameraView('iso')"
@@ -3227,10 +3745,12 @@
                 FRONT
               </button>
               <button class="viewport-btn" id="btnWireframe" onclick="toggleWireframe()" title="Toggle CAD Wireframe">
-                Wireframe: OFF
+                <span class="desktop-text">Wireframe: OFF</span>
+                <span class="mobile-text">WF: OFF</span>
               </button>
               <button class="viewport-btn" id="btnResetView" onclick="reset3DCamera()" title="Reset Camera Angle">
-                Reset
+                <span class="desktop-text">Reset</span>
+                <span class="mobile-text">↺</span>
               </button>
             </div>
           </div>
@@ -4556,32 +5076,57 @@
   <div class="terminal-lightbox" id="terminalLightbox" onclick="closeLightboxOnOverlay(event)">
     <div class="lightbox-header">
       <div class="lightbox-title-box">
-        <span class="lightbox-counter" id="lightboxCounter">Screen 1 of 6</span>
-        <h3 class="lightbox-title" id="lightboxTitle">Watchlist (Home) — Real-Time MCX Commodities Quotes</h3>
+        <h3 class="lightbox-title" id="lightboxTitle">Terminal Authentication Portal &amp; Cyber Security Gate</h3>
       </div>
       <div class="lightbox-actions">
+        <button class="lightbox-action-tool" id="lightboxZoomBtn" onclick="toggleLightboxZoom(event)"
+          aria-label="Toggle zoom" title="Toggle Zoom In / Out">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <circle cx="11" cy="11" r="8"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            <line x1="11" y1="8" x2="11" y2="14"></line>
+            <line x1="8" y1="11" x2="14" y2="11"></line>
+          </svg>
+          <span class="lightbox-tool-label">Zoom</span>
+        </button>
+        <button class="lightbox-action-tool" id="lightboxRotateBtn" onclick="toggleLightboxRotate(event)"
+          aria-label="Rotate view" title="Rotate 90° for Landscape View on Mobile">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <path d="M23 4v6h-6"></path>
+            <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
+          </svg>
+          <span class="lightbox-tool-label">Rotate</span>
+        </button>
         <a href="http://avim.somee.com" target="_blank" rel="noopener noreferrer" class="btn-primary"
-          style="padding: 6px 14px; font-size: 0.8rem; text-decoration: none;">
-          Open Live Terminal ↗
+          style="padding: 5px 12px; font-size: 0.74rem; text-decoration: none; white-space: nowrap;">
+          Live Terminal ↗
         </a>
         <button class="lightbox-close-btn" onclick="closeTerminalLightbox()" aria-label="Close lightbox">✕</button>
       </div>
     </div>
-    <div class="lightbox-content-stage">
-      <button class="lightbox-nav-btn prev" onclick="prevTerminalScreen()" aria-label="Previous screen">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+    <div class="lightbox-content-stage" id="lightboxContentStage" onclick="handleStageClick(event)"
+      title="Click or tap to zoom">
+      <button class="lightbox-nav-btn prev" onclick="event.stopPropagation(); prevTerminalScreen();"
+        aria-label="Previous screen">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
           <polyline points="15 18 9 12 15 6"></polyline>
         </svg>
       </button>
-      <img id="lightboxImg" src="Project Images/Home.png" alt="Enlarged screenshot" class="lightbox-img">
-      <button class="lightbox-nav-btn next" onclick="nextTerminalScreen()" aria-label="Next screen">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+      <div class="lightbox-img-wrapper" id="lightboxImgWrapper">
+        <img id="lightboxImg" src="Project Images/Login.png" alt="Enlarged screenshot" class="lightbox-img">
+      </div>
+      <button class="lightbox-nav-btn next" onclick="event.stopPropagation(); nextTerminalScreen();"
+        aria-label="Next screen">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
           <polyline points="9 18 15 12 9 6"></polyline>
         </svg>
       </button>
+      <div class="lightbox-reset-pill" id="lightboxResetPill" onclick="resetLightboxTransform(event)">
+        <span id="lightboxResetPillText">✕ Reset View</span>
+      </div>
     </div>
     <div class="lightbox-caption-bar" id="lightboxCaption">
-      Use ← Left / Right → Arrow keys or buttons to navigate &bull; Press Esc to close
+      Tap image to zoom in/out &bull; Swipe or use ← / → to navigate &bull; Esc to close
     </div>
   </div>
 
@@ -5323,16 +5868,19 @@
         }
       });
 
+      const isMobile = window.innerWidth <= 640;
+      const distOffset = isMobile ? 2.5 : 0;
+
       if (preset === 'iso') {
-        targetCameraAngle = { x: 0.50, y: 0.65, dist: 11.5 };
+        targetCameraAngle = { x: 0.50, y: 0.65, dist: 11.5 + distOffset };
         const b = document.getElementById('btnViewIso');
         if (b) b.classList.add('active');
       } else if (preset === 'top') {
-        targetCameraAngle = { x: 1.35, y: 0.00, dist: 10.5 };
+        targetCameraAngle = { x: 1.35, y: 0.00, dist: 10.5 + distOffset };
         const b = document.getElementById('btnViewTop');
         if (b) b.classList.add('active');
       } else if (preset === 'front') {
-        targetCameraAngle = { x: 0.12, y: 0.00, dist: 10.0 };
+        targetCameraAngle = { x: 0.12, y: 0.00, dist: 10.0 + distOffset };
         const b = document.getElementById('btnViewFront');
         if (b) b.classList.add('active');
       }
@@ -5372,16 +5920,17 @@
         targetCameraAngle.dist = Math.max(7.5, Math.min(18.0, targetCameraAngle.dist + e.deltaY * 0.012));
       }, { passive: false });
 
-      // Touch Orbit (Mobile)
+      // Touch Orbit (Mobile) - { passive: false } prevents page scroll conflict while rotating
       canvas.addEventListener('touchstart', (e) => {
         if (e.touches.length === 1) {
           isDragging = true;
           prevMouse = { x: e.touches[0].clientX, y: e.touches[0].clientY };
         }
-      }, { passive: true });
+      }, { passive: false });
 
       canvas.addEventListener('touchmove', (e) => {
         if (!isDragging || e.touches.length !== 1) return;
+        e.preventDefault(); // Prevents page jumping on mobile during 3D rotation
         const dx = e.touches[0].clientX - prevMouse.x;
         const dy = e.touches[0].clientY - prevMouse.y;
 
@@ -5389,7 +5938,7 @@
         targetCameraAngle.x = Math.max(0.08, Math.min(1.42, targetCameraAngle.x + dy * 0.0065));
 
         prevMouse = { x: e.touches[0].clientX, y: e.touches[0].clientY };
-      }, { passive: true });
+      }, { passive: false });
 
       canvas.addEventListener('touchend', () => {
         isDragging = false;
@@ -5511,8 +6060,17 @@
     function toggleWireframe() {
       isWireframe = !isWireframe;
       const btn = document.getElementById('btnWireframe');
-      btn.innerText = `Wireframe: ${isWireframe ? 'ON' : 'OFF'}`;
-      btn.classList.toggle('active', isWireframe);
+      if (btn) {
+        const deskSpan = btn.querySelector('.desktop-text');
+        const mobSpan = btn.querySelector('.mobile-text');
+        if (deskSpan && mobSpan) {
+          deskSpan.innerText = `Wireframe: ${isWireframe ? 'ON' : 'OFF'}`;
+          mobSpan.innerText = `WF: ${isWireframe ? 'ON' : 'OFF'}`;
+        } else {
+          btn.innerText = `Wireframe: ${isWireframe ? 'ON' : 'OFF'}`;
+        }
+        btn.classList.toggle('active', isWireframe);
+      }
 
       cncGroup.traverse((child) => {
         if (child.isMesh && child.material) {
@@ -5984,10 +6542,14 @@
         btn.classList.toggle('active', idx === index);
       });
 
-      // Update thumbnails active state
+      // Update thumbnails active state & auto-scroll into view on mobile
       const thumbItems = document.querySelectorAll('.terminal-thumb-item');
       thumbItems.forEach((thumb, idx) => {
-        thumb.classList.toggle('active', idx === index);
+        const isActive = (idx === index);
+        thumb.classList.toggle('active', isActive);
+        if (isActive && typeof thumb.scrollIntoView === 'function') {
+          thumb.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+        }
       });
 
       // Update metadata overlay
@@ -6024,6 +6586,41 @@
       switchTerminalScreen(currentScreenIndex - 1);
     }
 
+    // Mobile Touch Swipe Gesture for Interactive Terminal Console
+    (function initTerminalTouchSwipe() {
+      const stage = document.querySelector('.terminal-screen-stage');
+      if (!stage) return;
+      let startX = 0, startY = 0, endX = 0, endY = 0;
+
+      stage.addEventListener('touchstart', (e) => {
+        if (e.touches.length === 1) {
+          startX = e.touches[0].clientX;
+          startY = e.touches[0].clientY;
+          endX = startX;
+          endY = startY;
+        }
+      }, { passive: true });
+
+      stage.addEventListener('touchmove', (e) => {
+        if (e.touches.length === 1) {
+          endX = e.touches[0].clientX;
+          endY = e.touches[0].clientY;
+        }
+      }, { passive: true });
+
+      stage.addEventListener('touchend', () => {
+        const deltaX = endX - startX;
+        const deltaY = endY - startY;
+        if (Math.abs(deltaX) > 40 && Math.abs(deltaX) > Math.abs(deltaY) * 1.25) {
+          if (deltaX < 0) {
+            nextTerminalScreen();
+          } else {
+            prevTerminalScreen();
+          }
+        }
+      }, { passive: true });
+    })();
+
     function openTerminalLightbox(index) {
       if (typeof index === 'number') {
         switchTerminalScreen(index);
@@ -6039,7 +6636,99 @@
       }
     }
 
+    let isLightboxZoomed = false;
+    let isLightboxRotated = false;
+
+    function resetLightboxTransform(e) {
+      if (e) e.stopPropagation();
+      const stage = document.getElementById('lightboxContentStage');
+      const zoomBtn = document.getElementById('lightboxZoomBtn');
+      const rotBtn = document.getElementById('lightboxRotateBtn');
+      const pill = document.getElementById('lightboxResetPill');
+
+      isLightboxZoomed = false;
+      isLightboxRotated = false;
+      if (stage) {
+        stage.classList.remove('zoomed', 'rotated');
+      }
+      if (zoomBtn) zoomBtn.classList.remove('active');
+      if (rotBtn) rotBtn.classList.remove('active');
+      if (pill) pill.style.display = 'none';
+
+      if (typeof playBeep === 'function' && e) {
+        playBeep(500, 0.04);
+      }
+    }
+
+    function toggleLightboxZoom(e) {
+      if (e) e.stopPropagation();
+      const stage = document.getElementById('lightboxContentStage');
+      const zoomBtn = document.getElementById('lightboxZoomBtn');
+      const pill = document.getElementById('lightboxResetPill');
+      const pillText = document.getElementById('lightboxResetPillText');
+      if (!stage) return;
+
+      isLightboxZoomed = !isLightboxZoomed;
+      if (isLightboxZoomed) {
+        if (isLightboxRotated) {
+          isLightboxRotated = false;
+          stage.classList.remove('rotated');
+          const rotBtn = document.getElementById('lightboxRotateBtn');
+          if (rotBtn) rotBtn.classList.remove('active');
+        }
+        stage.classList.add('zoomed');
+        if (zoomBtn) zoomBtn.classList.add('active');
+        if (pill) pill.style.display = 'flex';
+        if (pillText) pillText.textContent = '✕ Reset Zoom';
+      } else {
+        stage.classList.remove('zoomed');
+        if (zoomBtn) zoomBtn.classList.remove('active');
+        if (!isLightboxRotated && pill) pill.style.display = 'none';
+      }
+      if (typeof playBeep === 'function') {
+        playBeep(isLightboxZoomed ? 850 : 550, 0.04);
+      }
+    }
+
+    function toggleLightboxRotate(e) {
+      if (e) e.stopPropagation();
+      const stage = document.getElementById('lightboxContentStage');
+      const rotBtn = document.getElementById('lightboxRotateBtn');
+      const pill = document.getElementById('lightboxResetPill');
+      const pillText = document.getElementById('lightboxResetPillText');
+      if (!stage) return;
+
+      isLightboxRotated = !isLightboxRotated;
+      if (isLightboxRotated) {
+        if (isLightboxZoomed) {
+          isLightboxZoomed = false;
+          stage.classList.remove('zoomed');
+          const zoomBtn = document.getElementById('lightboxZoomBtn');
+          if (zoomBtn) zoomBtn.classList.remove('active');
+        }
+        stage.classList.add('rotated');
+        if (rotBtn) rotBtn.classList.add('active');
+        if (pill) pill.style.display = 'flex';
+        if (pillText) pillText.textContent = '↻ Reset Orientation';
+      } else {
+        stage.classList.remove('rotated');
+        if (rotBtn) rotBtn.classList.remove('active');
+        if (!isLightboxZoomed && pill) pill.style.display = 'none';
+      }
+      if (typeof playBeep === 'function') {
+        playBeep(isLightboxRotated ? 750 : 520, 0.04);
+      }
+    }
+
+    function handleStageClick(e) {
+      if (e.target.closest('.lightbox-nav-btn') || e.target.closest('.lightbox-reset-pill')) {
+        return;
+      }
+      toggleLightboxZoom(e);
+    }
+
     function closeTerminalLightbox() {
+      resetLightboxTransform();
       const lightbox = document.getElementById('terminalLightbox');
       if (lightbox) {
         lightbox.classList.remove('open');
@@ -6051,16 +6740,16 @@
     }
 
     function closeLightboxOnOverlay(e) {
-      if (e.target.id === 'terminalLightbox' || e.target.classList.contains('lightbox-content-stage')) {
+      if (e.target.id === 'terminalLightbox') {
         closeTerminalLightbox();
       }
     }
 
     function updateLightboxContent() {
+      resetLightboxTransform();
       const screen = TERMINAL_SCREENS[currentScreenIndex];
       const img = document.getElementById('lightboxImg');
       const title = document.getElementById('lightboxTitle');
-      const counter = document.getElementById('lightboxCounter');
       const caption = document.getElementById('lightboxCaption');
 
       if (img) {
@@ -6068,11 +6757,48 @@
         img.alt = screen.fullTitle;
       }
       if (title) title.innerText = screen.fullTitle;
-      if (counter) counter.innerText = `Screen ${currentScreenIndex + 1} of ${TERMINAL_SCREENS.length}`;
-      if (caption) caption.innerText = `${screen.desc} • Use Left / Right arrows to cycle • Press Esc to close`;
+      if (caption) {
+        caption.innerHTML = `<span style="color:var(--cyan-neon);font-weight:600;">${screen.badge}</span> &bull; Tap or 🔍 to zoom &bull; ↻ Rotate for mobile landscape &bull; Swipe to navigate`;
+      }
     }
 
-    // Keyboard listener for lightbox navigation & Escape
+    // Lightbox Mobile Touch Swipe Gesture
+    (function initLightboxTouchSwipe() {
+      const stage = document.getElementById('lightboxContentStage');
+      if (!stage) return;
+      let startX = 0, startY = 0, endX = 0, endY = 0;
+
+      stage.addEventListener('touchstart', (e) => {
+        if (e.touches.length === 1) {
+          startX = e.touches[0].clientX;
+          startY = e.touches[0].clientY;
+          endX = startX;
+          endY = startY;
+        }
+      }, { passive: true });
+
+      stage.addEventListener('touchmove', (e) => {
+        if (e.touches.length === 1) {
+          endX = e.touches[0].clientX;
+          endY = e.touches[0].clientY;
+        }
+      }, { passive: true });
+
+      stage.addEventListener('touchend', () => {
+        if (isLightboxZoomed) return;
+        const deltaX = endX - startX;
+        const deltaY = endY - startY;
+        if (Math.abs(deltaX) > 40 && Math.abs(deltaX) > Math.abs(deltaY) * 1.25) {
+          if (deltaX < 0) {
+            nextTerminalScreen();
+          } else {
+            prevTerminalScreen();
+          }
+        }
+      }, { passive: true });
+    })();
+
+    // Keyboard listener for lightbox navigation & Escape & shortcuts
     window.addEventListener('keydown', (e) => {
       const lightbox = document.getElementById('terminalLightbox');
       if (lightbox && lightbox.classList.contains('open')) {
@@ -6082,6 +6808,10 @@
           prevTerminalScreen();
         } else if (e.key === 'Escape') {
           closeTerminalLightbox();
+        } else if (e.key === 'z' || e.key === 'Z') {
+          toggleLightboxZoom();
+        } else if (e.key === 'r' || e.key === 'R') {
+          toggleLightboxRotate();
         }
       }
     });
